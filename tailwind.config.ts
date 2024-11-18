@@ -20,7 +20,7 @@ const config: Config = {
         edunestPurpleLight: "#F1F0FF",
         edunestYellow: "#FAE27C",
         edunestYellowLight: "#FEFCE8",
-      }
+      },
     },
   },
   plugins: [],

@@ -56,12 +56,12 @@ const data = [
   },
   {
     name: "Oct",
-    income: 3490,
+    income: 5490,
     expense: 4300,
   },
   {
     name: "Nov",
-    income: 3490,
+    income: 7000,
     expense: 4300,
   },
   {
@@ -113,10 +113,15 @@ const FinanceChart = () => {
           <Line
             type="monotone"
             dataKey="income"
-            stroke="#C3EBFA"
+            stroke="#68d0f6"
             strokeWidth={5}
           />
-          <Line type="monotone" dataKey="expense" stroke="#CFCEFF" strokeWidth={5} />
+          <Line
+            type="monotone"
+            dataKey="expense"
+            stroke="#7d7afd"
+            strokeWidth={5}
+          />
         </LineChart>
       </ResponsiveContainer>
     </div>
