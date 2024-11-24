@@ -40,9 +40,9 @@ const SingleTeacherPage = () => {
                   <Image src="/mail.png" alt="" width={14} height={14} />
                   <span>anthony@gmail.com</span>
                 </div>
-                <div className="w-full md:w-1/3 lg:w-full 2xl:w-1/3  flex items-center gap-2">
+                <div className=" w-full md:w-1/3 lg:w-full 2xl:w-1/3  flex items-center gap-2">
                   <Image src="/phone.png" alt="" width={14} height={14} />
-                  <span>+12345674566</span>
+                  <span >+12345674566</span>
                 </div>
               </div>
             </div>
