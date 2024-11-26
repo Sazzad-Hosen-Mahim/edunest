@@ -5,15 +5,11 @@ import { role, parentsData } from "@/lib/data";
 import Image from "next/image";
 import Link from "next/link";
 import FormModal from "../../../../components/FormModal";
+import { Parent, Prisma, Student } from "@prisma/client";
+import prisma from "@/lib/prisma";
+import { ITEM_PER_PAGE } from "@/lib/settings";
 
-type Parent = {
-  id: number;
-  name: string;
-  email?: string;
-  students: string[];
-  phone: string;
-  address: string;
-};
+type ParentList = Parent & { students: Student[] }
 
 const columns = [
   {
@@ -41,40 +37,77 @@ const columns = [
   },
 ];
 
-const ParentListPage = () => {
-  const renderRow = (item: Parent) => (
-    <tr
-      key={item.id}
-      className="border-b border-gray-200 even:bg-slate-100 text-sm hover:bg-edunestPurpleLight"
-    >
-      <td className="flex items-center gap-4 p-4">
-        <div className="flex flex-col">
-          <h3 className="font-semibold">{item.name}</h3>
-          <p className="text-xs text-gray-500">{item?.email}</p>
-        </div>
-      </td>
-      <td className="hidden md:table-cell">{item.students.join(",")}</td>
-      <td className="hidden md:table-cell">{item.phone}</td>
-      <td className="hidden lg:table-cell">{item.address}</td>
-      <td>
-        <div className="flex items-center gap-2">
-          
-          
-          {role === "admin" && (
-            // <button className="w-7 h-7 flex items-center justify-center rounded-full bg-edunestPurple">
-            //   <Image src="/delete.png" alt="" width={16} height={16} />
-            // </button>
-            <>
-            <FormModal table="parent" type="update" data={item} /> 
-            <FormModal table="parent" type="delete" id={item.id} />
-            </>
-          )}
-             
+const renderRow = (item: ParentList) => (
+  <tr
+    key={item.id}
+    className="border-b border-gray-200 even:bg-slate-100 text-sm hover:bg-edunestPurpleLight"
+  >
+    <td className="flex items-center gap-4 p-4">
+      <div className="flex flex-col">
+        <h3 className="font-semibold">{item.name}</h3>
+        <p className="text-xs text-gray-500">{item?.email}</p>
+      </div>
+    </td>
+    <td className="hidden md:table-cell">{item.students.map(student => student.name).join(",")}</td>
+    <td className="hidden md:table-cell">{item.phone}</td>
+    <td className="hidden lg:table-cell">{item.address}</td>
+    <td>
+      <div className="flex items-center gap-2">
 
-        </div>
-      </td>
-    </tr>
-  );
+
+        {role === "admin" && (
+          // <button className="w-7 h-7 flex items-center justify-center rounded-full bg-edunestPurple">
+          //   <Image src="/delete.png" alt="" width={16} height={16} />
+          // </button>
+          <>
+            <FormModal table="parent" type="update" data={item} />
+            <FormModal table="parent" type="delete" id={item.id} />
+          </>
+        )}
+
+
+      </div>
+    </td>
+  </tr>
+);
+const ParentListPage = async ({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | undefined }
+}) => {
+
+  const { page, ...queryParams } = searchParams;
+
+  const p = page ? parseInt(page) : 1;
+
+  //URL PARAMS CONDITION
+
+  const query: Prisma.ParentWhereInput = {}
+  if (queryParams) {
+    for (const [key, value] of Object.entries(queryParams)) {
+      if (value !== undefined) {
+        switch (key) {
+          case "search":
+            query.name = { contains: value, mode: "insensitive" }
+            break;
+          default:
+            break;
+        }
+      }
+    }
+  }
+
+  const [data, count] = await prisma.$transaction([
+    prisma.parent.findMany({
+      where: query,
+      include: {
+        students: true
+      },
+      take: ITEM_PER_PAGE,
+      skip: ITEM_PER_PAGE * (p - 1)
+    }),
+    prisma.parent.count({ where: query })
+  ])
   return (
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       {/* Top */}
@@ -97,10 +130,10 @@ const ParentListPage = () => {
       </div>
       {/* List */}
       <div className="">
-        <Table columns={columns} renderRow={renderRow} data={parentsData} />
+        <Table columns={columns} renderRow={renderRow} data={data} />
       </div>
       {/* Pagination */}
-      <Pagination />
+      <Pagination page={p} count={count} />
     </div>
   );
 };
