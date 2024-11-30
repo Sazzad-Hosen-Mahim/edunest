@@ -2,48 +2,18 @@ import FormModal from "@/components/FormModal"
 import Pagination from "@/components/Pagination"
 import Table from "@/components/Table"
 import TableSearch from "@/components/TableSearch"
-import { role, studentsData } from "@/lib/data"
 import prisma from "@/lib/prisma"
 import { ITEM_PER_PAGE } from "@/lib/settings"
+import { getAuthDetails } from "@/lib/utils"
 import { Class, Prisma, Student } from "@prisma/client"
 import Image from "next/image"
 import Link from "next/link"
 
 type studentList = Student & { class: Class }
 
-const columns = [
-  {
-    header: "Info",
-    accessor: "info"
-  },
-  {
-    header: "Student ID",
-    accessor: "studentId",
-    className: "hidden md:table-cell"
-  },
-  {
-    header: "Grade",
-    accessor: "grade",
-    className: "hidden md:table-cell"
-  },
 
-  {
-    header: "Phone",
-    accessor: "phone",
-    className: "hidden lg:table-cell"
-  },
-  {
-    header: "Address",
-    accessor: "address",
-    className: "hidden lg:table-cell"
-  },
-  {
-    header: "Actions",
-    accessor: "actions",
-  },
-]
 
-const renderRow = (item: studentList) => (
+const renderRow = (item: studentList, role: string | undefined) => (
   <tr key={item.id} className="border-b border-gray-200 even:bg-slate-100 text-sm hover:bg-edunestPurpleLight">
     <td className="flex items-center gap-4 p-2">
       <Image src={item.img || "/noAvatar.png"} alt="" width={40} height={40} className="md:hidden xl:block w-10 h-10 rounded-full object-cover" />
@@ -78,6 +48,40 @@ const StudentListPage = async ({
 }: {
   searchParams: { [key: string]: string | undefined }
 }) => {
+
+  const { role } = await getAuthDetails()
+
+  const columns = [
+    {
+      header: "Info",
+      accessor: "info"
+    },
+    {
+      header: "Student ID",
+      accessor: "studentId",
+      className: "hidden md:table-cell"
+    },
+    {
+      header: "Grade",
+      accessor: "grade",
+      className: "hidden md:table-cell"
+    },
+
+    {
+      header: "Phone",
+      accessor: "phone",
+      className: "hidden lg:table-cell"
+    },
+    {
+      header: "Address",
+      accessor: "address",
+      className: "hidden lg:table-cell"
+    },
+    ...(role === "admin" ? [{
+      header: "Actions",
+      accessor: "actions",
+    }] : []),
+  ]
 
   const { page, ...queryParams } = searchParams;
 
@@ -136,9 +140,6 @@ const StudentListPage = async ({
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
             {
-              // role === "admin" && <button className="w-8 h-8 flex items-center justify-center rounded-full bg-edunestYellow">
-              //   <Image src="/plus.png" alt="" width={14} height={14} />
-              // </button>
               <FormModal table="student" type="create" />
             }
           </div>
@@ -146,7 +147,7 @@ const StudentListPage = async ({
       </div>
       {/* List */}
       <div className="">
-        <Table columns={columns} renderRow={renderRow} data={data} />
+        <Table columns={columns} renderRow={(item) => renderRow(item, role)} data={data} />
       </div>
       {/* Pagination */}
       <Pagination page={p} count={count} />

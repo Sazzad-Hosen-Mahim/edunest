@@ -1,37 +1,18 @@
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
-import { role } from "@/lib/data";
 import Image from "next/image";
 import FormModal from '@/components/FormModal';
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Class, Lesson, Prisma, Subject, Teacher } from "@prisma/client";
+import { getAuthDetails } from "@/lib/utils";
 
 type LessonList = Lesson & { subject: Subject } & { class: Class } & { teacher: Teacher }
 
-const columns = [
-  {
-    header: "Subject",
-    accessor: "subject",
-  },
-  {
-    header: "Class",
-    accessor: "class",
-    className: "hidden md:table-cell",
-  },
 
-  {
-    header: "Teacher",
-    accessor: "teacher",
-  },
-  {
-    header: "Actions",
-    accessor: "actions",
-  },
-];
 
-const renderRow = (item: LessonList) => (
+const renderRow = (item: LessonList, role: string | undefined) => (
   <tr
     key={item.id}
     className="border-b border-gray-200 even:bg-slate-100 text-sm hover:bg-edunestPurpleLight"
@@ -57,6 +38,29 @@ const LessonListPage = async ({
 }: {
   searchParams: { [key: string]: string | undefined }
 }) => {
+
+  const { role, userId } = await getAuthDetails()
+
+  const columns = [
+    {
+      header: "Subject",
+      accessor: "subject",
+    },
+    {
+      header: "Class",
+      accessor: "class",
+      className: "hidden md:table-cell",
+    },
+
+    {
+      header: "Teacher",
+      accessor: "teacher",
+    },
+    ...(role === "admin" ? [{
+      header: "Actions",
+      accessor: "actions",
+    }] : []),
+  ];
 
   const { page, ...queryParams } = searchParams;
 
@@ -125,7 +129,7 @@ const LessonListPage = async ({
       </div>
       {/* List */}
       <div className="">
-        <Table columns={columns} renderRow={renderRow} data={data} />
+        <Table columns={columns} renderRow={(item) => renderRow(item, role)} data={data} />
       </div>
       {/* Pagination */}
       <Pagination page={p} count={count} />

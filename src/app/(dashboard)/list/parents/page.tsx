@@ -1,43 +1,17 @@
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
-import { role, parentsData } from "@/lib/data";
 import Image from "next/image";
-import Link from "next/link";
 import FormModal from "../../../../components/FormModal";
 import { Parent, Prisma, Student } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
+import { getAuthDetails } from "@/lib/utils";
 
 type ParentList = Parent & { students: Student[] }
 
-const columns = [
-  {
-    header: "Info",
-    accessor: "info",
-  },
-  {
-    header: "Student Names",
-    accessor: "students",
-    className: "hidden md:table-cell",
-  },
-  {
-    header: "Phone",
-    accessor: "phone",
-    className: "hidden md:table-cell",
-  },
-  {
-    header: "Address",
-    accessor: "address",
-    className: "hidden lg:table-cell",
-  },
-  {
-    header: "Actions",
-    accessor: "actions",
-  },
-];
 
-const renderRow = (item: ParentList) => (
+const renderRow = (item: ParentList, role: string | undefined) => (
   <tr
     key={item.id}
     className="border-b border-gray-200 even:bg-slate-100 text-sm hover:bg-edunestPurpleLight"
@@ -56,9 +30,6 @@ const renderRow = (item: ParentList) => (
 
 
         {role === "admin" && (
-          // <button className="w-7 h-7 flex items-center justify-center rounded-full bg-edunestPurple">
-          //   <Image src="/delete.png" alt="" width={16} height={16} />
-          // </button>
           <>
             <FormModal table="parent" type="update" data={item} />
             <FormModal table="parent" type="delete" id={item.id} />
@@ -75,6 +46,34 @@ const ParentListPage = async ({
 }: {
   searchParams: { [key: string]: string | undefined }
 }) => {
+
+  const { role, userId } = await getAuthDetails()
+
+  const columns = [
+    {
+      header: "Info",
+      accessor: "info",
+    },
+    {
+      header: "Student Names",
+      accessor: "students",
+      className: "hidden md:table-cell",
+    },
+    {
+      header: "Phone",
+      accessor: "phone",
+      className: "hidden md:table-cell",
+    },
+    {
+      header: "Address",
+      accessor: "address",
+      className: "hidden lg:table-cell",
+    },
+    ...(role === "admin" ? [{
+      header: "Actions",
+      accessor: "actions",
+    }] : []),
+  ];
 
   const { page, ...queryParams } = searchParams;
 
@@ -130,7 +129,7 @@ const ParentListPage = async ({
       </div>
       {/* List */}
       <div className="">
-        <Table columns={columns} renderRow={renderRow} data={data} />
+        <Table columns={columns} renderRow={(item) => renderRow(item, role)} data={data} />
       </div>
       {/* Pagination */}
       <Pagination page={p} count={count} />

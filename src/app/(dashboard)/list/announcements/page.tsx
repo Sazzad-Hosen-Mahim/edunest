@@ -1,46 +1,29 @@
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
-import { role, announcementsData } from "@/lib/data";
 import Image from "next/image";
-import Link from "next/link";
 import FormModal from '@/components/FormModal';
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Announcement, Class, Prisma } from "@prisma/client";
+import { getAuthDetails } from "@/lib/utils";
+
+
 
 type AnnouncementList = Announcement & { class: Class }
 
-const columns = [
-  {
-    header: "Title",
-    accessor: "title",
-  },
-  {
-    header: "Class",
-    accessor: "class",
-  },
-  {
-    header: "Date",
-    accessor: "date",
-  },
-  {
-    header: "Actions",
-    accessor: "actions",
-  },
-];
 
-const renderRow = (item: AnnouncementList) => (
+
+const renderRow = (item: AnnouncementList, role: string | undefined) => (
   <tr
     key={item.id}
     className="border-b border-gray-200 even:bg-slate-100 text-sm hover:bg-edunestPurpleLight"
   >
     <td className="p-4">{item.title}</td>
-    <td>{item.class.name}</td>
+    <td>{item.class?.name || "-"}</td>
     <td className="">{new Intl.DateTimeFormat("en-US").format(item.date)}</td>
     <td>
       <div className="flex items-center gap-2">
-
         {role === "admin" && (
           <>
             <FormModal table="announcement" type="update" data={item} />
@@ -56,6 +39,27 @@ const AnnouncementListPage = async ({
 }: {
   searchParams: { [key: string]: string | undefined }
 }) => {
+
+  const { role, userId } = await getAuthDetails();
+
+  const columns = [
+    {
+      header: "Title",
+      accessor: "title",
+    },
+    {
+      header: "Class",
+      accessor: "class",
+    },
+    {
+      header: "Date",
+      accessor: "date",
+    },
+    ...(role === "admin" ? [{
+      header: "Actions",
+      accessor: "actions",
+    }] : []),
+  ];
 
   const { page, ...queryParams } = searchParams;
 
@@ -81,6 +85,20 @@ const AnnouncementListPage = async ({
       }
     }
   }
+
+  // ROLE CONDITION
+  const roleConditions = {
+    teacher: { lessons: { some: { teacherId: userId! } } },
+    student: { students: { some: { id: userId! } } },
+    parent: { students: { some: { parentId: userId! } } },
+  };
+
+  query.OR = [
+    { classId: null },
+    {
+      class: roleConditions[role as keyof typeof roleConditions] || {}
+    }
+  ]
 
   const [data, count] = await prisma.$transaction([
     prisma.announcement.findMany({
@@ -119,7 +137,7 @@ const AnnouncementListPage = async ({
       <div className="">
         <Table
           columns={columns}
-          renderRow={renderRow}
+          renderRow={(item) => renderRow(item, role)}
           data={data}
         />
       </div>

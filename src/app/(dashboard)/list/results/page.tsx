@@ -1,13 +1,12 @@
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
-import { role, resultsData } from "@/lib/data";
 import Image from "next/image";
-import Link from "next/link";
 import FormModal from '@/components/FormModal';
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import prisma from "@/lib/prisma";
-import { Prisma, Result } from "@prisma/client";
+import { Prisma } from "@prisma/client";
+import { getAuthDetails } from "@/lib/utils";
 
 type ResultList = {
   id: number;
@@ -19,45 +18,11 @@ type ResultList = {
   score: number;
   className: string;
   startTime: Date;
-
 }
 
-const columns = [
 
-  {
-    header: "Title",
-    accessor: "title",
-  },
-  {
-    header: "Student",
-    accessor: "student",
-  },
-  {
-    header: "Score",
-    accessor: "score",
-  },
-  {
-    header: "Teacher",
-    accessor: "teacher",
-    className: "hidden md:table-cell",
-  },
-  {
-    header: "Class",
-    accessor: "class",
-    className: "hidden md:table-cell",
-  },
-  {
-    header: "Date",
-    accessor: "date",
-    className: "hidden md:table-cell",
-  },
-  {
-    header: "Actions",
-    accessor: "actions",
-  },
-];
 
-const renderRow = (item: ResultList) => (
+const renderRow = (item: ResultList, role: string | undefined) => (
   <tr
     key={item.id}
     className="border-b border-gray-200 even:bg-slate-100 text-sm hover:bg-edunestPurpleLight"
@@ -72,7 +37,7 @@ const renderRow = (item: ResultList) => (
     <td>
       <div className="flex items-center gap-2">
 
-        {role === "admin" && (
+        {(role === "admin" || role === "teacher") && (
           <>
             <FormModal table="result" type="update" data={item} />
             <FormModal table="result" type="delete" id={item.id} />
@@ -87,6 +52,44 @@ const ResultListPage = async ({
 }: {
   searchParams: { [key: string]: string | undefined }
 }) => {
+
+  const { role, userId } = await getAuthDetails()
+
+
+  const columns = [
+
+    {
+      header: "Title",
+      accessor: "title",
+    },
+    {
+      header: "Student",
+      accessor: "student",
+    },
+    {
+      header: "Score",
+      accessor: "score",
+    },
+    {
+      header: "Teacher",
+      accessor: "teacher",
+      className: "hidden md:table-cell",
+    },
+    {
+      header: "Class",
+      accessor: "class",
+      className: "hidden md:table-cell",
+    },
+    {
+      header: "Date",
+      accessor: "date",
+      className: "hidden md:table-cell",
+    },
+    ...(role === "admin" || role === "teacher" ? [{
+      header: "Actions",
+      accessor: "actions",
+    }] : []),
+  ];
 
   const { page, ...queryParams } = searchParams;
 
@@ -116,6 +119,30 @@ const ResultListPage = async ({
         }
       }
     }
+  }
+
+  // ROLE CONDITIONS 
+  switch (role) {
+    case "admin":
+      break;
+    case "teacher":
+      query.OR = [
+        { exam: { lesson: { teacherId: userId! } } },
+        { assignment: { lesson: { teacherId: userId! } } },
+      ]
+      break;
+
+    case "student":
+      query.studentId = userId!;
+
+    case "parent":
+      query.students = {
+        parentId: userId!
+      }
+      break;
+
+    default:
+      break;
   }
 
   const [dataRes, count] = await prisma.$transaction([
@@ -181,7 +208,7 @@ const ResultListPage = async ({
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-edunestYellow">
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
-            {role === "admin" && (
+            {(role === "admin" || role === "teacher") && (
               <FormModal table="result" type="create" />
             )}
           </div>
@@ -189,7 +216,7 @@ const ResultListPage = async ({
       </div>
       {/* List */}
       <div className="">
-        <Table columns={columns} renderRow={renderRow} data={data} />
+        <Table columns={columns} renderRow={(item) => renderRow(item, role)} data={data} />
       </div>
       {/* Pagination */}
       <Pagination page={p} count={count} />
