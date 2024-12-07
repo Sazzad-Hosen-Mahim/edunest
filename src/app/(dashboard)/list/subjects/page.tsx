@@ -1,4 +1,4 @@
-import FormModal from "@/components/FormModal";
+import FormContainer from "@/components/FormContainer";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
@@ -25,8 +25,8 @@ const renderRow = (item: SubjectList, role: string | undefined) => (
         {role === "admin" && (
           <>
 
-            <FormModal table="subject" type="update" data={item} />
-            <FormModal table="subject" type="delete" id={item.id} />
+            <FormContainer table="subject" type="update" data={item} />
+            <FormContainer table="subject" type="delete" id={item.id} />
           </>
         )}
       </div>
@@ -107,7 +107,7 @@ const SubjectListPage = async ({
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
             {role === "admin" && (
-              <FormModal table="subject" type="create" />
+              <FormContainer table="subject" type="create" />
             )}
           </div>
         </div>
