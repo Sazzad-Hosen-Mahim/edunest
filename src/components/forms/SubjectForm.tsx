@@ -11,7 +11,6 @@ import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
 
 
-
 const SubjectForm = ({
     type,
     data,
