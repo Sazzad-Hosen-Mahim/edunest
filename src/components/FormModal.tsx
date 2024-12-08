@@ -1,6 +1,6 @@
 "use client"
 
-import { deleteSubject } from "@/lib/actions";
+import { deleteClass, deleteSubject } from "@/lib/actions";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -13,7 +13,7 @@ import { FormContainerProps } from "./FormContainer";
 
 const deleteActionMap = {
     subject: deleteSubject,
-    class: deleteSubject,
+    class: deleteClass,
     teacher: deleteSubject,
     student: deleteSubject,
     parent: deleteSubject,
@@ -73,12 +73,12 @@ const forms: {
     ) => JSX.Element
 } = {
     subject: (setOpen, type, data, relatedData) => <SubjectForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
+    class: (setOpen, type, data, relatedData) => <ClassForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
     // teacher: (setOpen, type, data, relatedData) => <TeacherForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
     // student: (setOpen, type, data, relatedData) => <StudentForm type={type} data={data} setOpen={setOpen} relatedData={relatedData}/>,
     // parent: (type, data, setOpen) => <ParentForm type={type} data={data} />,
     // announcement: (type, data, setOpen) => <AnnouncementForm type={type} data={data} />,
     // attendance: (type, data, setOpen) => <AttendanceForm type={type} data={data} />,
-    // class: (type, data, setOpen) => <ClassForm type={type} data={data} />,
     // event: (type, data, setOpen) => <EventForm type={type} data={data} />,
     // exam: (type, data, setOpen) => <ExamForm type={type} data={data} />,
     // lesson: (type, data, setOpen) => <LessonForm type={type} data={data} />,
