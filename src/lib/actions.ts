@@ -380,18 +380,18 @@ export const createExam = async (
   const { userId, role } = await getAuthDetails();
 
   try {
-    if (role === "teacher") {
-      const teacherLesson = await prisma.lesson.findFirst({
-        where: {
-          teacherId: userId,
-          id: data.lessonId,
-        },
-      });
+    // if (role === "teacher") {
+    //   const teacherLesson = await prisma.lesson.findFirst({
+    //     where: {
+    //       teacherId: userId!,
+    //       id: data.lessonId,
+    //     },
+    //   });
 
-      if (!teacherLesson) {
-        return { success: false, error: true };
-      }
-    }
+    //   if (!teacherLesson) {
+    //     return { success: false, error: true };
+    //   }
+    // }
     await prisma.exam.create({
       data: {
         title: data.title,

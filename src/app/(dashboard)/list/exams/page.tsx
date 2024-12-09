@@ -25,8 +25,8 @@ const ExamListPage = async ({
   searchParams: { [key: string]: string | undefined }
 }) => {
 
-  const { role, userId } = await getAuthDetails()
-  console.log("Role: ", role, "userID: ", userId,);
+  const { role, userId } = await getAuthDetails();
+  const currentUserId = userId;
 
   const columns = [
     {
@@ -109,19 +109,22 @@ const ExamListPage = async ({
     }
   }
 
-  console.log("Query object: ", query)
+  console.log("Query object: ", query);
+  console.log("Role: ", role, "userID: ", userId,);
+
 
   // ROLE CONDITIONS 
   switch (role) {
     case "admin":
       break;
     case "teacher":
-      query.lesson.teacherId = userId;
+      query.lesson.teacherId = currentUserId!;
+      break;
     case "student":
       query.lesson.class = {
         students: {
           some: {
-            id: userId,
+            id: currentUserId!,
           },
         },
       };
@@ -129,7 +132,7 @@ const ExamListPage = async ({
       query.lesson.class = {
         students: {
           some: {
-            parentId: userId,
+            parentId: currentUserId!,
           },
         },
       };
