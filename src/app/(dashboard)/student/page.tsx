@@ -3,10 +3,11 @@ import BigCalendar from "@/components/BigCalendar";
 import BigCalendarContainer from "@/components/BigCalendarContainer";
 import EventCalendar from "@/components/EventCalendar";
 import prisma from "@/lib/prisma";
+import { getAuthDetails } from "@/lib/utils";
 import { auth } from "@clerk/nextjs/server";
 
 const StudentPage = async () => {
-  const { userId } = await auth()
+  const { userId, role } = await getAuthDetails()
 
   // console.log(userId)
 

@@ -1,6 +1,7 @@
 import Announcements from "@/components/Announcements";
 import BigCalendar from "@/components/BigCalendar";
 import BigCalendarContainer from "@/components/BigCalendarContainer";
+import FormContainer from "@/components/FormContainer";
 import Performance from "@/components/Performance";
 import StudentAttendanceCard from "@/components/StudentAttendanceCard";
 import prisma from "@/lib/prisma";
@@ -56,8 +57,19 @@ const SingleTeacherPage = async ({
               />
             </div>
             <div className="w-2/3 flex-col justify-between gap-4 ">
-              <h1 className="text-xl font-semibold mb-2">{student.name + " " + student.surname}</h1>
-              <p className="text-sm text-gray-500 mb-2">
+
+              <div className="flex items-center gap-4">
+                <h1 className="text-xl font-semibold">{student.name + " " + student.surname}</h1>
+                {role === "admin" && (
+                  <FormContainer
+                    table="student"
+                    type="update"
+                    data={student}
+                  />
+                )}
+
+              </div>
+              <p className="text-sm text-gray-500 mt-2 mb-2">
                 Lorem ipsum dolor sit amet consectetur adipisicing.
               </p>
               <div className="flex items-center justify-between gap-2 flex-wrap text-xs font-medium">
