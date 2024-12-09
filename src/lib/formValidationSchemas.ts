@@ -26,7 +26,9 @@ export const teacherSchema = z.object({
     .max(20, { message: "Username can not be long more than 20 characters" }),
   password: z
     .string()
-    .min(6, { message: "Password must be at least 6 characters" }),
+    .min(6, { message: "Password must be at least 6 characters" })
+    .optional()
+    .or(z.literal("")),
   name: z.string().min(1, { message: "First name is required" }),
   surname: z.string().min(1, { message: "Last name is required" }),
   email: z
