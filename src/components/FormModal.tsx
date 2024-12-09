@@ -1,6 +1,6 @@
 "use client"
 
-import { deleteClass, deleteStudent, deleteSubject, deleteTeacher } from "@/lib/actions";
+import { deleteClass, deleteExam, deleteStudent, deleteSubject, deleteTeacher } from "@/lib/actions";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -18,7 +18,7 @@ const deleteActionMap = {
     student: deleteStudent,
     parent: deleteSubject,
     lesson: deleteSubject,
-    exam: deleteSubject,
+    exam: deleteExam,
     assignment: deleteSubject,
     result: deleteSubject,
     attendance: deleteSubject,
@@ -76,11 +76,11 @@ const forms: {
     class: (setOpen, type, data, relatedData) => <ClassForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
     teacher: (setOpen, type, data, relatedData) => <TeacherForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
     student: (setOpen, type, data, relatedData) => <StudentForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
+    exam: (setOpen, type, data, relatedData) => <ExamForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
     // parent: (type, data, setOpen) => <ParentForm type={type} data={data} />,
     // announcement: (type, data, setOpen) => <AnnouncementForm type={type} data={data} />,
     // attendance: (type, data, setOpen) => <AttendanceForm type={type} data={data} />,
     // event: (type, data, setOpen) => <EventForm type={type} data={data} />,
-    // exam: (type, data, setOpen) => <ExamForm type={type} data={data} />,
     // lesson: (type, data, setOpen) => <LessonForm type={type} data={data} />,
     // result: (type, data, setOpen) => <ResultForm type={type} data={data} />,
     // assignment: (type, data, setOpen) => <AssignmentForm type={type} data={data} />,
@@ -110,7 +110,7 @@ const FormModal = ({
 
         useEffect(() => {
             if (state.success) {
-                toast(`Subject has been deleted`)
+                toast(`${table} has been deleted`)
                 setOpen(false);
                 router.refresh();
             }
